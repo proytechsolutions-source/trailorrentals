@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premier Trailer Rentals | Wichita</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      background: #f8f8f8;
+    }
+    header {
+      background: #2c3e50;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 15px;
+      color: #fff;
+      text-decoration: none;
+    }
+    section {
+      padding: 40px 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .trailer {
+      background: #fff;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #219150;
+    }
+    footer {
+      background: #2c3e50;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    #calendar {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .day {
+      padding: 12px;
+      background: #fff;
+      border-radius: 5px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .booked {
+      background: #e74c3c;
+      color: white;
+    }
+    .available {
+      background: #2ecc71;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Premier Trailer Rentals</h1>
+    <p>Your trusted trailer rental service in Wichita</p>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#rentals">Rentals</a>
+      <a href="#calendar">Availability</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section id="about">
+    <h2>About Us</h2>
+    <p>Premier Trailer Rentals is a small business proudly serving the Wichita area. As a local business owner, I take pride in offering affordable and reliable trailer rentals to help you move, haul, and transport with ease.</p>
+  </section>
+
+  <section id="rentals">
+    <h2>Our Trailers</h2>
+    <div class="trailer">
+      <h3>Utility Trailer</h3>
+      <p>Perfect for moving furniture, small equipment, or weekend projects.</p>
+      <button onclick="alert('Booking request sent for Utility Trailer!')">Rent This Trailer</button>
+    </div>
+    <div class="trailer">
+      <h3>Car Hauler</h3>
+      <p>Great for transporting vehicles safely and securely.</p>
+      <button onclick="alert('Booking request sent for Car Hauler!')">Rent This Trailer</button>
+    </div>
+    <div class="trailer">
+      <h3>Enclosed Trailer</h3>
+      <p>Keep your belongings safe and dry with our enclosed trailer rentals.</p>
+      <button onclick="alert('Booking request sent for Enclosed Trailer!')">Rent This Trailer</button>
+    </div>
+  </section>
+
+  <section id="calendar">
+    <h2>Availability</h2>
+    <p>Dates marked in red are already booked.</p>
+    <div id="calendar"></div>
+  </section>
+
+  <section id="contact">
+    <h2>Contact Us</h2>
+    <p>Have questions or ready to book? Get in touch today!</p>
+    <p>Email: <a href="mailto:info@premiertrailerrentals.com">info@premiertrailerrentals.com</a></p>
+    <p>Phone: (316) 555-1234</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Premier Trailer Rentals | Wichita, KS</p>
+  </footer>
+
+  <script>
+    const calendarDiv = document.getElementById("calendar");
+
+    // Replace with your own API Key + Calendar ID
+    const API_KEY = "YOUR_API_KEY";
+    const CALENDAR_ID = "YOUR_CALENDAR_ID@group.calendar.google.com";
+
+    fetch(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}`)
+      .then(response => response.json())
+      .then(data => {
+        const events = data.items || [];
+        let bookedDates = [];
+
+        events.forEach(event => {
+          if (event.start && event.start.date) {
+            bookedDates.push(event.start.date);
+          }
+        });
+
+        // Build a 30-day calendar
+        const today = new Date();
+        for (let i = 0; i < 30; i++) {
+          let day = new Date();
+          day.setDate(today.getDate() + i);
+
+          let div = document.createElement("div");
+          div.classList.add("day");
+
+          let dateStr = day.toISOString().split("T")[0];
+
+          if (bookedDates.includes(dateStr)) {
+            div.classList.add("booked");
+            div.innerText = `${day.toDateString()} - Booked`;
+          } else {
+            div.classList.add("available");
+            div.innerText = `${day.toDateString()} - Available`;
+            div.onclick = () => alert("You selected " + day.toDateString());
+          }
+          calendarDiv.appendChild(div);
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching calendar events:", err);
+        calendarDiv.innerHTML = "<p>Unable to load availability at this time.</p>";
+      });
+  </script>
+</body>
+</html>
