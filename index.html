@@ -3,166 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premier Trailer Rentals | Car Hauler</title>
+  <title>Premier Trailer Rentals | Wichita</title>
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #0d0d0d;
-      color: #fff;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#0d0d0d; color:#fff; }
     header {
-      background: #001f3f;
+      background: url('https://via.placeholder.com/1600x600') no-repeat center/cover;
       color: #fff;
-      padding: 20px;
+      padding: 100px 20px;
       text-align: center;
     }
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 40px 20px;
+    header h1 { font-size: 48px; margin:0; color:#00aaff; }
+    header p { font-size: 20px; }
+    .btn { background:#00aaff; padding:15px 25px; border:none; border-radius:6px; color:#fff; font-size:18px; cursor:pointer; }
+    .container { max-width:1000px; margin:auto; padding:40px 20px; }
+    .trailer-card {
+      background:#111; border-radius:10px; overflow:hidden;
+      box-shadow:0 4px 12px rgba(0,0,0,0.4);
+      margin:20px 0; display:flex; flex-wrap:wrap;
     }
-    .trailer-detail {
-      display: flex;
-      flex-wrap: wrap;
-      background: #111;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .trailer-detail img {
-      flex: 1 1 50%;
-      width: 100%;
-      object-fit: cover;
-    }
-    .trailer-info {
-      flex: 1 1 50%;
-      padding: 20px;
-      background: #1a1a1a;
-    }
-    h1 {
-      margin-top: 0;
-      font-size: 28px;
-      color: #00aaff;
-    }
-    .price {
-      font-size: 24px;
-      font-weight: bold;
-      margin: 10px 0;
-      color: #00aaff;
-    }
-    .description {
-      margin: 20px 0;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    button {
-      background: #00aaff;
-      color: white;
-      border: none;
-      padding: 15px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      margin-top: 20px;
-    }
-    button:hover {
-      background: #0088cc;
-    }
-    .calendar {
-      margin-top: 30px;
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    .day {
-      padding: 10px;
-      border-radius: 5px;
-      margin: 5px;
-      text-align: center;
-      display: inline-block;
-      min-width: 100px;
-    }
-    .booked {
-      background: #e74c3c;
-      color: white;
-    }
-    .available {
-      background: #00aaff;
-      color: white;
-      cursor: pointer;
-    }
+    .trailer-card img { flex:1 1 40%; width:100%; object-fit:cover; }
+    .trailer-info { flex:1 1 60%; padding:20px; }
+    .trailer-info h2 { margin:0; color:#00aaff; }
+    .price { font-size:20px; margin:10px 0; color:#00aaff; }
+    footer { background:#001f3f; text-align:center; padding:20px; margin-top:40px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Premier Trailer Rentals</h1>
-    <p>Wichita's trusted trailer rentals</p>
-  </header>
 
-  <div class="container">
-    <div class="trailer-detail">
-      <img src="https://via.placeholder.com/600x400" alt="Car Hauler Trailer">
-      <div class="trailer-info">
-        <h1>20ft Car Hauler Trailer</h1>
-        <p class="price">$95 / Day</p>
-        <p class="description">
-          Heavy-duty 20ft car hauler trailer, perfect for transporting vehicles safely. 
-          Equipped with ramps, strong tie-down points, and a durable build. 
-          Ideal for cars, small trucks, or equipment.
-        </p>
-        <button id="reserveBtn">Reserve Now</button>
+<header>
+  <h1>Premier Trailer Rentals</h1>
+  <p>Wichita's trusted trailer rental service</p>
+  <a href="trailer.html"><button class="btn">View Trailer</button></a>
+</header>
 
-        <div class="calendar" id="calendar">
-          <h3>Availability</h3>
-          <p>Select an available date below:</p>
-        </div>
-      </div>
+<div class="container">
+  <h2>Available Trailers</h2>
+  <div class="trailer-card">
+    <img src="https://via.placeholder.com/600x400" alt="Car Hauler">
+    <div class="trailer-info">
+      <h2>20ft Car Hauler Trailer</h2>
+      <p class="price">$95 / Day</p>
+      <p>Perfect for hauling vehicles and equipment. Strong ramps, tie-downs, durable build.</p>
+      <a href="trailer.html"><button class="btn">View & Rent</button></a>
     </div>
   </div>
+</div>
 
-  <script>
-    const calendarDiv = document.getElementById("calendar");
+<footer>
+  <p>&copy; 2025 Premier Trailer Rentals | Wichita, KS</p>
+</footer>
 
-    // Replace with your own Google API Key + Calendar ID
-    const API_KEY = "YOUR_API_KEY";
-    const CALENDAR_ID = "YOUR_CALENDAR_ID@group.calendar.google.com";
-
-    fetch(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}`)
-      .then(res => res.json())
-      .then(data => {
-        const events = data.items || [];
-        let bookedDates = [];
-        events.forEach(ev => {
-          if (ev.start && ev.start.date) bookedDates.push(ev.start.date);
-        });
-
-        const today = new Date();
-        for (let i = 0; i < 14; i++) {
-          let d = new Date();
-          d.setDate(today.getDate() + i);
-          let dateStr = d.toISOString().split("T")[0];
-          let div = document.createElement("div");
-          div.classList.add("day");
-
-          if (bookedDates.includes(dateStr)) {
-            div.classList.add("booked");
-            div.innerText = d.toDateString() + " - Booked";
-          } else {
-            div.classList.add("available");
-            div.innerText = d.toDateString() + " - Available";
-            div.onclick = () => alert("You selected " + d.toDateString());
-          }
-
-          calendarDiv.appendChild(div);
-        }
-      });
-    
-    // Stripe placeholder
-    document.getElementById("reserveBtn").addEventListener("click", () => {
-      alert("Payment integration coming soon! This would connect to Stripe Checkout.");
-    });
-  </script>
 </body>
 </html>
+
