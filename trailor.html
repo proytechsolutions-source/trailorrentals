@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>20ft Car Hauler Trailer | Premier Trailer Rentals</title>
+  <style>
+    body { margin:0; font-family: Arial, sans-serif; background:#0d0d0d; color:#fff; }
+    .container { max-width:1000px; margin:auto; padding:40px 20px; }
+    .trailer-detail { display:flex; flex-wrap:wrap; background:#111; border-radius:10px; overflow:hidden; }
+    .trailer-detail img { flex:1 1 50%; width:100%; object-fit:cover; }
+    .trailer-info { flex:1 1 50%; padding:20px; }
+    h1 { color:#00aaff; }
+    .price { font-size:24px; margin:10px 0; color:#00aaff; }
+    .description { margin:20px 0; }
+    button { background:#00aaff; padding:15px 25px; border:none; border-radius:6px; color:#fff; font-size:18px; cursor:pointer; }
+    button:hover { background:#0088cc; }
+    .calendar { margin-top:30px; background:#222; padding:20px; border-radius:10px; }
+    .day { padding:10px; border-radius:5px; margin:5px; text-align:center; display:inline-block; min-width:120px; }
+    .booked { background:#e74c3c; color:white; }
+    .available { background:#00aaff; color:white; cursor:pointer; }
+    .map { margin-top:30px; }
+  </style>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+<div class="container">
+  <div class="trailer-detail">
+    <img src="https://via.placeholder.com/600x400" alt="Car Hauler">
+    <div class="trailer-info">
+      <h1>20ft Car Hauler Trailer</h1>
+      <p class="price">$95 / Day</p>
+      <p class="description">
+        Heavy-duty 20ft car hauler trailer, perfect for transporting vehicles safely. 
+        Equipped with ramps, tie-downs, and a strong build.
+      </p>
+      <button id="reserveBtn">Reserve with Stripe</button>
+
+      <div class="calendar" id="calendar">
+        <h3>Availability</h3>
+        <p>Select an available date:</p>
+      </div>
+
+      <div class="map">
+        <h3>Pickup Location</h3>
+        <select id="locationSelect">
+          <option value="wichita">Wichita, KS</option>
+        </select>
+        <iframe id="mapFrame" 
+          src="https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=Wichita,KS" 
+          width="100%" height="300" style="border:0; margin-top:10px;" allowfullscreen="" loading="lazy">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Stripe Checkout Setup ---
+  const stripe = Stripe("YOUR_STRIPE_PUBLISHABLE_KEY");
+  document.getElementById("reserveBtn").addEventListener("click", () => {
+    stripe.redirectToCheckout({
+      lineItems: [{ price: "YOUR_STRIPE_PRICE_ID", quantity: 1 }],
+      mode: "payment",
+      successUrl: window.location.origin + "/success.html",
+      cancelUrl: window.location.origin + "/trailer.html"
+    });
+  });
+
+  // --- Google Calendar Availability ---
+  const calendarDiv = document.getElementById("calendar");
+  const API_KEY = "YOUR_GOOGLE_API_KEY";
+  const CALENDAR_ID = "YOUR_CALENDAR_ID@group.calendar.google.com";
+
+  fetch(`https://www.googleapis.com/calendar/v3/calendars/${CALENDAR_ID}/events?key=${API_KEY}`)
+    .then(res => res.json())
+    .then(data => {
+      const events = data.items || [];
+      let booked = events.map(ev => ev.start?.date).filter(Boolean);
+
+      const today = new Date();
+      for (let i = 0; i < 14; i++) {
+        let d = new Date();
+        d.setDate(today.getDate() + i);
+        let ds = d.toISOString().split("T")[0];
+
+        let div = document.createElement("div");
+        div.classList.add("day");
+        if (booked.includes(ds)) {
+          div.classList.add("booked");
+          div.innerText = d.toDateString() + " - Booked";
+        } else {
+          div.classList.add("available");
+          div.innerText = d.toDateString() + " - Available";
+          div.onclick = () => alert("Selected " + d.toDateString());
+        }
+        calendarDiv.appendChild(div);
+      }
+    });
+
+  // --- Map Dropdown ---
+  document.getElementById("locationSelect").addEventListener("change", e => {
+    let loc = e.target.value;
+    document.getElementById("mapFrame").src =
+      `https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${loc}`;
+  });
+</script>
+
+</body>
+</html>
