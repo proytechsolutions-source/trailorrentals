@@ -1,28 +1,271 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Premier Trailer Rentals</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h1>Premier Trailer Rentals</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="trailer.html">Rent a Trailer</a>
-    </nav>
-  </header>
+import React, { useState } from "react";
 
-  <section class="hero">
-    <h2>Your Local Wichita Trailer Rental Company</h2>
-    <p>Reliable trailer rentals for hauling cars, equipment, and more. Locally owned small business serving Wichita and surrounding areas.</p>
-    <a href="trailer.html" class="btn">View Trailer</a>
-  </section>
+// TrailerDetail.jsx
+// Single-file React component (Tailwind CSS) that reproduces a trailer-detail page
+// Features included:
+// - Responsive image gallery with main image and thumbnails
+// - Trailer title, short description, and price per day
+// - Specs table (length, payload, axles, etc.)
+// - Simple availability date pickers with blocked dates support
+// - Map iframe placeholder (Google Maps embed) and location selector
+// - "Reserve Now" button (placeholder for Stripe Checkout)
+// - Notes and TODOs for wiring to backend / Stripe
 
-  <footer>
-    <p>&copy; 2025 Premier Trailer Rentals - Wichita, KS</p>
-  </footer>
-</body>
-</html>
+// How to use:
+// - Drop this component into a React app that uses Tailwind CSS.
+// - Replace placeholder images and map URL with real content.
+// - Hook up the onReserve() function to your booking API / Stripe session creator.
+
+export default function TrailerDetail({ trailer }) {
+  // example trailer prop fallback
+  const example = {
+    id: "5194",
+    title: "Diamond C 20' Car Hauler Trailer",
+    pricePerDay: 85,
+    location: "Wichita, KS",
+    address: "1500 E Central Ave, Wichita, KS",
+    images: [
+      "https://via.placeholder.com/1200x700?text=Trailer+Main+1",
+      "https://via.placeholder.com/1200x700?text=Trailer+Main+2",
+      "https://via.placeholder.com/1200x700?text=Trailer+Main+3",
+    ],
+    specs: {
+      length: "20 ft",
+      width: "8.5 ft",
+      weight: "2,800 lbs",
+      payload: "7,200 lbs",
+      axles: "2",
+      brakes: "Electric",
+      ramp: "Bifold",
+      lights: "LED",
+    },
+    description:
+      "Reliable car hauler with heavy-duty deck, LED lights, and ramp. Perfect for cars, ATVs, and small equipment.",
+    blockedDates: ["2025-10-10", "2025-10-11", "2025-10-20"], // example blocked dates (YYYY-MM-DD)
+  };
+
+  const t = trailer || example;
+
+  const [mainIndex, setMainIndex] = useState(0);
+  const [pickup, setPickup] = useState("");
+  const [dropoff, setDropoff] = useState("");
+  const [message, setMessage] = useState("");
+
+  // simple date validation and blocked date check
+  function isBlocked(dateStr) {
+    return t.blockedDates.includes(dateStr);
+  }
+
+  function onReserve() {
+    // Basic front-end validation
+    if (!pickup || !dropoff) {
+      setMessage("Please choose pickup and drop-off dates.");
+      return;
+    }
+    if (pickup > dropoff) {
+      setMessage("Pickup date must be before drop-off date.");
+      return;
+    }
+    // check if any blocked dates fall within the range (simple inclusive loop)
+    const start = new Date(pickup);
+    const end = new Date(dropoff);
+    let conflict = null;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const iso = d.toISOString().slice(0, 10);
+      if (isBlocked(iso)) {
+        conflict = iso;
+        break;
+      }
+    }
+    if (conflict) {
+      setMessage(`Sorry — a blocked date (${conflict}) falls inside your requested range.`);
+      return;
+    }
+
+    setMessage("Preparing checkout... (this is a placeholder)");
+
+    // TODO: Replace the following with a call to your backend that creates a Stripe Checkout session.
+    // Example: POST /create-checkout-session { trailerId, pickup, dropoff, userInfo }
+    // Then redirect to the returned session.url.
+    // For now we'll open a placeholder link.
+    window.open("https://buy.stripe.com/test_placeholder", "_blank");
+  }
+
+  // helper to format price estimate
+  function estimatePrice() {
+    if (!pickup || !dropoff) return null;
+    const a = new Date(pickup);
+    const b = new Date(dropoff);
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const days = Math.ceil((b - a) / msPerDay) + 1; // inclusive
+    if (days <= 0) return null;
+    return (days * t.pricePerDay).toFixed(2);
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto p-4">
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Gallery */}
+        <div className="md:col-span-2">
+          <div className="rounded-lg overflow-hidden shadow">
+            <img
+              src={t.images[mainIndex]}
+              alt={`${t.title} image ${mainIndex + 1}`}
+              className="w-full h-96 object-cover"
+            />
+          </div>
+
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {t.images.map((src, i) => (
+              <button
+                key={i}
+                onClick={() => setMainIndex(i)}
+                className={`rounded overflow-hidden border ${i === mainIndex ? "ring-2 ring-offset-2 ring-indigo-400" : ""}`}
+              >
+                <img src={src} alt={`thumb-${i}`} className="w-full h-24 object-cover" />
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6">
+            <h1 className="text-2xl font-semibold">{t.title}</h1>
+            <p className="mt-2 text-gray-700">{t.description}</p>
+            <div className="mt-4 flex items-center gap-4">
+              <div className="text-xl font-bold">${t.pricePerDay}/day</div>
+              <div className="text-sm text-gray-500">Location: {t.location}</div>
+            </div>
+
+            <section className="mt-6">
+              <h2 className="font-semibold">Specifications</h2>
+              <table className="w-full mt-2 text-sm">
+                <tbody className="text-gray-700">
+                  <tr className="border-t">
+                    <td className="py-2 font-medium w-40">Length</td>
+                    <td className="py-2">{t.specs.length}</td>
+                  </tr>
+                  <tr className="border-t">
+                    <td className="py-2 font-medium">Width</td>
+                    <td className="py-2">{t.specs.width}</td>
+                  </tr>
+                  <tr className="border-t">
+                    <td className="py-2 font-medium">Weight</td>
+                    <td className="py-2">{t.specs.weight}</td>
+                  </tr>
+                  <tr className="border-t">
+                    <td className="py-2 font-medium">Payload</td>
+                    <td className="py-2">{t.specs.payload}</td>
+                  </tr>
+                  <tr className="border-t">
+                    <td className="py-2 font-medium">Axles</td>
+                    <td className="py-2">{t.specs.axles}</td>
+                  </tr>
+                  <tr className="border-t">
+                    <td className="py-2 font-medium">Brakes</td>
+                    <td className="py-2">{t.specs.brakes}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+        </div>
+
+        {/* Booking panel */}
+        <aside className="bg-white border rounded-lg p-4 shadow-md">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <div className="text-sm text-gray-500">From</div>
+              <div className="text-2xl font-bold">${t.pricePerDay}/day</div>
+            </div>
+            <div className="text-sm text-gray-500">ID: {t.id}</div>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Pickup</label>
+            <input
+              type="date"
+              value={pickup}
+              onChange={(e) => setPickup(e.target.value)}
+              className="w-full mt-1 border rounded px-2 py-2"
+            />
+          </div>
+
+          <div className="mt-3">
+            <label className="block text-sm font-medium">Drop-off</label>
+            <input
+              type="date"
+              value={dropoff}
+              onChange={(e) => setDropoff(e.target.value)}
+              className="w-full mt-1 border rounded px-2 py-2"
+            />
+          </div>
+
+          <div className="mt-3">
+            <div className="text-sm text-gray-600">Blocked dates</div>
+            <div className="mt-1 text-xs text-red-600">
+              {t.blockedDates.length ? t.blockedDates.join(", ") : "None"}
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <button
+              onClick={onReserve}
+              className="w-full py-2 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+            >
+              Reserve Now
+            </button>
+
+            <div className="mt-2 text-sm text-gray-700">
+              {estimatePrice() && (
+                <div>
+                  <div>Estimated total: ${estimatePrice()}</div>
+                  <div className="text-xs text-gray-500">Taxes & fees may apply</div>
+                </div>
+              )}
+            </div>
+
+            {message && <div className="mt-3 text-sm text-red-600">{message}</div>}
+          </div>
+
+          <div className="mt-4 text-xs text-gray-500">
+            NOTE: This page is a front-end template. Wire the Reserve button to your server that creates
+            a Stripe Checkout session and enforces blocked dates on the backend.
+          </div>
+        </aside>
+      </div>
+
+      {/* Map + policies */}
+      <div className="mt-8 grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 className="font-semibold">Pickup Location</h3>
+          <div className="mt-2 border rounded overflow-hidden">
+            {/* Replace place_id or q with your address or coordinates */}
+            <iframe
+              title="map"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(t.address)}&output=embed`}
+              className="w-full h-64 border-0"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-semibold">Policies & Notes</h3>
+          <div className="mt-2 text-sm text-gray-700">
+            <ul className="list-disc pl-5">
+              <li>Driver must be 21+ with valid ID.</li>
+              <li>Security deposit may be required.</li>
+              <li>Return with same fuel/clean condition.</li>
+              <li>Blocked dates are maintained by owner; check before booking.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 text-sm text-gray-600">
+        <strong>Developer notes:</strong> Connect the booking flow to a backend API that enforces availability,
+        creates Stripe checkout sessions, and records reservations. Use the trailer id ({t.id}) when creating
+        bookings so you can track inventory across multiple trailers.
+      </div>
+    </div>
+  );
+}
